@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Alta de Activo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-item>
+    <ion-label position="stacked">Nombre *</ion-label>
+    <ion-input [(ngModel)]="nombreActivo" required></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">Ubicación</ion-label>
+    <ion-input [(ngModel)]="ubicacion"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">Compañía</ion-label>
+    <ion-input [(ngModel)]="compania"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">Fotografía</ion-label>
+    <input type="file" (change)="onFileChange($event)" accept="image/*">
+  </ion-item>
+
+  <ion-button expand="full" color="primary" (click)="guardarActivoYImprimir()">
+    Guardar e Imprimir
+  </ion-button>
+
+</ion-content>

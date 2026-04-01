@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "io.ionic.smartgasoperativa",
+  "variantName": "release",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 10147,
+      "versionName": "1.01.47",
+      "outputFile": "app-release.apk"
+    }
+  ],
+  "elementType": "File"
+}
