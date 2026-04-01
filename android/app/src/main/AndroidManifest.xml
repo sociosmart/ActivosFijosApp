@@ -55,6 +55,7 @@
   <!-- Hardware features -->
   <uses-feature android:name="android.hardware.location.gps" />
   <uses-feature android:name="android.hardware.CAMERA" android:required="false" />
-
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
 </manifest>
