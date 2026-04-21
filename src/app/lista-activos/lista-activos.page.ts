@@ -16,7 +16,7 @@ export class ListaActivosPage implements OnInit {
   imagenSeleccionada: SafeUrl | null = null;
   modalImagenAbierto = false;
 
-  private apiUrl = 'http://192.168.68.149/api_activos_v2/public/';
+  private apiUrl = 'http://172.16.64.120:8080//api_activos_v2/public/';
 
   constructor(
     private http: HttpClient,

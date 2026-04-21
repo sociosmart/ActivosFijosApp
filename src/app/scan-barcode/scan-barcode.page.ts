@@ -18,7 +18,7 @@ export class ScanBarcodePage {
   isScanning = false;
   showScannerUI = false;
 
-  private API = 'http://192.168.68.149/api_activos_v2/public';
+  private API = 'http://172.16.64.120:8080//api_activos_v2/public';
 
   constructor(private http: HttpClient, private toast: ToastController) {}
 

@@ -99,7 +99,7 @@ export class AltaActivoPage {
       formData.append('fotografia', this.selectedFile, this.selectedFile.name);
 
       this.http.post(
-        'http://192.168.68.149/api_activos_v2/public/activos',
+        'http://172.16.64.120:8080//api_activos_v2/public/activos',
         formData
       ).subscribe({
 
