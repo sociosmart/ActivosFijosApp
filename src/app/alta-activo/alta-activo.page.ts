@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { AuthService } from '../services/auth.services';
-
+import { CanActivate, Router } from '@angular/router';
 @Component({
   selector: 'app-alta-activo',
   templateUrl: './alta-activo.page.html',
@@ -38,7 +38,7 @@ export class AltaActivoPage {
     private androidPermissions: AndroidPermissions,
     private toastController: ToastController,
     private http: HttpClient,
-    private auth: AuthService
+    private auth: AuthService,private router:Router
   ) {}
 
   // ================= FOTO =================
@@ -338,4 +338,20 @@ cmds.push(0x1D, 0x56, 0x42, 0x00);
     });
     toast.present();
   }
+  async logout() {
+  try {
+    await this.auth.logout();
+
+    this.showToast('Sesión cerrada 👋', 'success');
+
+    // opcional: limpiar formulario o estados locales
+    this.limpiarFormulario();
+    this.ultimoTicket = null;
+
+    this.router.navigate(['/login']); // o la ruta inicial
+  } catch (e) {
+    console.error(e);
+    this.showToast('Error al cerrar sesión ❌', 'danger');
+  }
+}
 }
