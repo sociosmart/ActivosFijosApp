@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    
+
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/alta-activo"></ion-back-button>
     </ion-buttons>
@@ -19,13 +19,18 @@
 
 <ion-content class="ion-padding fondo">
 
+  <!-- LISTA DE ACTIVOS -->
   <ion-card *ngFor="let activo of activos" class="card-activo">
 
     <!-- IMAGEN -->
     <div class="img-card-container">
       <ng-container *ngIf="imagenes[activo.id]; else loadingImg">
-        <img [src]="imagenes[activo.id]" (click)="abrirImagen(imagenes[activo.id])" />
+        <img
+          [src]="imagenes[activo.id]"
+          (click)="abrirImagen(imagenes[activo.id])"
+        />
       </ng-container>
+
       <ng-template #loadingImg>
         <div class="img-loading">
           <ion-spinner name="crescent"></ion-spinner>
@@ -57,9 +62,30 @@
 
   </ion-card>
 
+
+  <!-- 🔥 INFINITE SCROLL -->
+  <ion-infinite-scroll
+    threshold="100px"
+    (ionInfinite)="loadMore($event)"
+    [disabled]="!hayMas">
+
+    <ion-infinite-scroll-content
+      loadingSpinner="crescent"
+      loadingText="Cargando más activos...">
+    </ion-infinite-scroll-content>
+
+  </ion-infinite-scroll>
+
+
+  <!-- OPCIONAL: mensaje cuando ya no hay más -->
+  <div *ngIf="!hayMas" class="no-mas">
+    <p>No hay más activos por mostrar</p>
+  </div>
+
 </ion-content>
 
-<!-- MODAL -->
+
+<!-- MODAL IMAGEN -->
 <ion-modal [isOpen]="modalImagenAbierto" (didDismiss)="cerrarImagen()">
   <ng-template>
     <ion-content class="modal-img-wrapper">

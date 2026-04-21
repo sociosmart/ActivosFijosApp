@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { AuthService } from '../services/auth.services';
@@ -13,10 +13,20 @@ export class ListaActivosPage implements OnInit {
 
   activos: any[] = [];
   imagenes: { [key: number]: SafeUrl } = {};
+
   imagenSeleccionada: SafeUrl | null = null;
   modalImagenAbierto = false;
 
   private apiUrl = 'http://172.16.64.120:8080/api_activos_v2/public/';
+
+  // 🔥 PAGINACIÓN
+  pagina = 1;
+  limite = 10;
+  cargando = false;
+  hayMas = true;
+
+  // 🔥 CONTROL DE DUPLICADOS
+  private idsCargados = new Set<number>();
 
   constructor(
     private http: HttpClient,
@@ -48,7 +58,7 @@ export class ListaActivosPage implements OnInit {
         return;
       }
 
-    await this.cargarActivos();
+      await this.cargarActivos();
 
     } catch (err) {
       console.error(err);
@@ -59,63 +69,97 @@ export class ListaActivosPage implements OnInit {
   }
 
   // ================= CARGAR ACTIVOS =================
- async cargarActivos() {
+  async cargarActivos(event?: any) {
 
-  const loading = await this.loadingController.create({
-    message: 'Cargando activos...'
-  });
+    if (this.cargando || !this.hayMas) {
+      event?.target?.complete();
+      return;
+    }
 
-  await loading.present();
+    this.cargando = true;
 
-  this.http.get<any[]>(`${this.apiUrl}activos`)
-    .subscribe({
+    this.http.get<any[]>(
+      `${this.apiUrl}activos?pagina=${this.pagina}&limite=${this.limite}`
+    ).subscribe({
+
       next: (res) => {
 
-        console.log('ACTIVOS:', res);
+        const data = res || [];
 
-        this.activos = res || [];
+        // 🔥 eliminar duplicados
+        const nuevos = data.filter((a: any) => {
+          if (this.idsCargados.has(a.id)) {
+            return false;
+          }
+          this.idsCargados.add(a.id);
+          return true;
+        });
 
-        // 🔥 cargar imágenes
-        for (const activo of this.activos) {
+        // 🔥 si no hay nuevos datos reales
+        if (nuevos.length === 0) {
+          this.hayMas = false;
+        }
+
+        // 🔥 si vino menos de lo esperado, ya no hay más
+        if (nuevos.length < this.limite) {
+          this.hayMas = false;
+        }
+
+        this.activos = [...this.activos, ...nuevos];
+
+        // cargar imágenes
+        for (const activo of nuevos) {
           if (activo.id) {
             this.cargarImagen(activo.id);
           }
         }
 
-      },
-      error: async (err) => {
+        this.pagina++;
 
-        console.error('ERROR API:', err);
+      },
+
+      error: (err) => {
+        console.error(err);
 
         if (err.status === 401) {
           this.showToast('Sesión expirada ❌', 'danger');
         } else {
           this.showToast('Error al cargar activos ❌', 'danger');
         }
-
-        await loading.dismiss();
       },
-      complete: async () => {
-        await loading.dismiss();
+
+      complete: () => {
+        this.cargando = false;
+        event?.target?.complete();
       }
+
     });
-}
-cargarImagen(id: number) {
+  }
 
-  this.http.get(`${this.apiUrl}activo/${id}/imagen`, {
-    responseType: 'blob'
-  }).subscribe({
-    next: (blob) => {
+  // ================= INFINITE SCROLL =================
+  async loadMore(event: any) {
+    await this.cargarActivos(event);
+  }
 
-      const url = URL.createObjectURL(blob);
-      this.imagenes[id] = this.sanitizer.bypassSecurityTrustUrl(url);
+  // ================= IMAGEN =================
+  cargarImagen(id: number) {
 
-    },
-    error: (err) => {
-      console.error('ERROR IMAGEN:', id, err);
-    }
-  });
-}
+    this.http.get(`${this.apiUrl}activo/${id}/imagen`, {
+      responseType: 'blob'
+    }).subscribe({
+
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.imagenes[id] = this.sanitizer.bypassSecurityTrustUrl(url);
+      },
+
+      error: (err) => {
+        console.error('ERROR IMAGEN:', id, err);
+      }
+
+    });
+  }
+
   // ================= MODAL =================
   abrirImagen(img: SafeUrl) {
     this.imagenSeleccionada = img;
@@ -128,15 +172,15 @@ cargarImagen(id: number) {
   }
 
   // ================= REFRESH =================
-async refrescar(event?: any) {
+  async refrescar(event?: any) {
 
-  await this.cargarActivos();
+    this.pagina = 1;
+    this.activos = [];
+    this.idsCargados.clear();   // 🔥 clave para evitar duplicados
+    this.hayMas = true;
 
-  // 🔥 solo si existe (evita error)
-  if (event?.target?.complete) {
-    event.target.complete();
+    await this.cargarActivos(event);
   }
-}
 
   // ================= TOAST =================
   private async showToast(msg: string, color: string) {
@@ -147,5 +191,4 @@ async refrescar(event?: any) {
     });
     t.present();
   }
-  
 }
