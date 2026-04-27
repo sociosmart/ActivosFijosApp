@@ -1,0 +1,21 @@
+.header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-id {
+  font-size: 12px;
+  background: #3880ff;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin-top: 4px;
+}

@@ -1,0 +1,40 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Menú</ion-title>
+
+   <ion-buttons slot="end">
+  <ion-button (click)="logout()" color="light">
+    <ion-icon name="log-out-outline"></ion-icon>
+  </ion-button>
+</ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="menu-content">
+
+  <div class="welcome">
+    <h2>Bienvenido 👋</h2>
+    <p>Selecciona una opción</p>
+  </div>
+
+  <div class="menu-grid">
+
+    <ion-card class="menu-card" routerLink="/alta-activo">
+      <ion-icon name="qr-code-outline"></ion-icon>
+      <h3>Alta de activos</h3>
+    </ion-card>
+
+    <ion-card class="menu-card" routerLink="/inventarios">
+      <ion-icon name="clipboard-outline"></ion-icon>
+      <h3>Inventarios</h3>
+    </ion-card>
+
+    <ion-card class="menu-card" routerLink="/lista-activos">
+      <ion-icon name="list-outline"></ion-icon>
+      <h3>Lista de activos</h3>
+    </ion-card>
+     
+
+  </div>
+
+</ion-content>

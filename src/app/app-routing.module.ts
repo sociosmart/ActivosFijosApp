@@ -26,9 +26,22 @@ const routes: Routes = [
   {
     path: 'pruebaimpresion',
     loadChildren: () => import('./pruebaimpresion/pruebaimpresion.module').then( m => m.PruebaimpresionPageModule)
-  },  {
+  },
+  {
     path: 'scan-barcode',
     loadChildren: () => import('./scan-barcode/scan-barcode.module').then( m => m.ScanBarcodePageModule)
+  },
+  {
+    path: 'menu',
+    loadChildren: () => import('./menu/menu.module').then( m => m.MenuPageModule)
+  },
+  {
+    path: 'inventarios',
+    loadChildren: () => import('./inventarios/inventarios.module').then( m => m.InventariosPageModule)
+  },
+  {
+    path: 'inventario-detalle/:id',
+    loadChildren: () => import('./inventario-detalle/inventario-detalle.module').then( m => m.InventarioDetallePageModule)
   }
 
 

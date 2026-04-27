@@ -1,12 +1,11 @@
 <ion-header>
   <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+      <ion-back-button defaultHref="/menu"></ion-back-button>
+    </ion-buttons>
     <ion-title>Alta de Activo</ion-title>
 
-    <ion-buttons slot="end">
-  <ion-button (click)="logout()" color="light">
-    <ion-icon name="log-out-outline"></ion-icon>
-  </ion-button>
-</ion-buttons>
+   
   </ion-toolbar>
 </ion-header>
 
@@ -61,13 +60,7 @@
         <ion-button color="warning" expand="block" (click)="reimprimirTicket()">
   🔁 Reimprimir último ticket
 </ion-button>
-      <ion-button expand="block" color="primary" routerLink="/scan-barcode">
-  📷 Escanear código de barras
-</ion-button>
-
-        <ion-button expand="block" color="secondary" routerLink="/lista-activos">
-          Ver Lista de Activos
-        </ion-button>
+   
       </div>
 
     </ion-card-content>

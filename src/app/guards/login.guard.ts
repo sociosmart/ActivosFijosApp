@@ -18,7 +18,7 @@ export class LoginGuard implements CanActivate {
 
     // 🔥 si ya está logueado, redirige
     if (token) {
-      this.router.navigateByUrl('/alta-activo', { replaceUrl: true });
+      this.router.navigateByUrl('/menu', { replaceUrl: true });
       return false;
     }
 

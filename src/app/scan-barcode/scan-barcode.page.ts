@@ -21,6 +21,11 @@ export class ScanBarcodePage {
   private API = 'http://172.16.64.120:8080/api_activos_v2/public';
 
   constructor(private http: HttpClient, private toast: ToastController) {}
+  ionViewDidEnter(){
+      if (!this.isScanning) {
+    this.startScan();
+  }
+  }
 
   // ================= INICIAR SCAN =================
   async startScan() {
@@ -154,4 +159,7 @@ export class ScanBarcodePage {
     });
     t.present();
   }
+  ionViewWillLeave() {
+  this.stopScan();
+}
 }

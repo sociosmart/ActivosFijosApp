@@ -1,101 +1,89 @@
 <ion-header>
-  <ion-toolbar color="primary">
-
+  <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/alta-activo"></ion-back-button>
+      <ion-back-button defaultHref="/menu"></ion-back-button>
     </ion-buttons>
-
     <ion-title>Activos</ion-title>
 
     <ion-buttons slot="end">
-      <ion-button (click)="refrescar($event)">
-        <ion-icon name="refresh-outline"></ion-icon>
+      <ion-button (click)="refrescarManual()">
+        <ion-icon name="refresh"></ion-icon>
       </ion-button>
     </ion-buttons>
 
   </ion-toolbar>
 </ion-header>
 
+<ion-content>
 
-<ion-content class="ion-padding fondo">
+  <!-- 🔄 PULL TO REFRESH -->
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <!-- LISTA DE ACTIVOS -->
-  <ion-card *ngFor="let activo of activos" class="card-activo">
+  <!-- 📦 LISTA -->
+  <ion-list>
 
-    <!-- IMAGEN -->
-    <div class="img-card-container">
-      <ng-container *ngIf="imagenes[activo.id]; else loadingImg">
-        <img
-          [src]="imagenes[activo.id]"
-          (click)="abrirImagen(imagenes[activo.id])"
-        />
-      </ng-container>
+    <ion-item *ngFor="let activo of activos">
 
-      <ng-template #loadingImg>
-        <div class="img-loading">
-          <ion-spinner name="crescent"></ion-spinner>
+      <!-- Imagen -->
+      <ion-thumbnail slot="start" (click)="abrirImagen(imagenes[activo.id])">
+        <ion-img [src]="imagenes[activo.id]"></ion-img>
+      </ion-thumbnail>
+
+      <!-- 🔥 TU DISEÑO ORIGINAL -->
+      <ion-label>
+
+        <div class="header-card">
+          <h2>{{ activo.nombre }}</h2>
+          <span class="badge-id">#{{ activo.id }}</span>
         </div>
-      </ng-template>
-    </div>
 
-    <!-- INFO -->
-    <ion-card-content class="card-content">
+        <h3>{{ activo.compania }}</h3>
 
-      <div class="header-card">
-        <h2>{{ activo.nombre }}</h2>
-        <span class="badge-id">#{{ activo.id }}</span>
-      </div>
+        <div class="info-item">
+          <ion-icon name="location-outline"></ion-icon>
+          <span>{{ activo.ubicacion || 'Sin ubicación' }}</span>
+        </div>
 
-      <h3>{{ activo.compania }}</h3>
+        <div class="info-item">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>{{ activo.fecha }}</span>
+        </div>
 
-      <div class="info-item">
-        <ion-icon name="location-outline"></ion-icon>
-        <span>{{ activo.ubicacion || 'Sin ubicación' }}</span>
-      </div>
+      </ion-label>
 
-      <div class="info-item">
-        <ion-icon name="calendar-outline"></ion-icon>
-        <span>{{ activo.fecha }}</span>
-      </div>
+    </ion-item>
 
-    </ion-card-content>
+  </ion-list>
 
-  </ion-card>
+  <!-- 🔽 BOTÓN SCAN -->
+  <div style="text-align: center; padding: 20px;">
+    <ion-button expand="block" color="primary" (click)="irEscaner()">
+      <ion-icon name="barcode-outline" slot="start"></ion-icon>
+      Escanear código de barras
+    </ion-button>
 
-
-  <!-- 🔥 INFINITE SCROLL -->
-  <ion-infinite-scroll
-    threshold="100px"
-    (ionInfinite)="loadMore($event)"
-    [disabled]="!hayMas">
-
-    <ion-infinite-scroll-content
-      loadingSpinner="crescent"
-      loadingText="Cargando más activos...">
-    </ion-infinite-scroll-content>
-
-  </ion-infinite-scroll>
-
-
-  <!-- OPCIONAL: mensaje cuando ya no hay más -->
-  <div *ngIf="!hayMas" class="no-mas">
-    <p>No hay más activos por mostrar</p>
+    <p style="margin-top:10px; font-size: 12px; color: gray;">
+      ¿No encuentras el activo? Escanea su código para obtener información.
+    </p>
   </div>
 
+  <!-- 🖼️ MODAL IMAGEN -->
+  <ion-modal [isOpen]="modalImagenAbierto">
+    <ng-template>
+      <ion-content>
+
+        <div style="text-align:center; padding:20px;">
+          <img [src]="imagenSeleccionada" style="max-width:100%; border-radius:10px;">
+        </div>
+
+        <ion-button expand="block" (click)="cerrarImagen()">
+          Cerrar
+        </ion-button>
+
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>
-
-
-<!-- MODAL IMAGEN -->
-<ion-modal [isOpen]="modalImagenAbierto" (didDismiss)="cerrarImagen()">
-  <ng-template>
-    <ion-content class="modal-img-wrapper">
-
-      <button class="btn-cerrar" (click)="cerrarImagen()">✕</button>
-
-      <div class="img-container-modal">
-        <img [src]="imagenSeleccionada" class="img-full" />
-      </div>
-
-    </ion-content>
-  </ng-template>
-</ion-modal>

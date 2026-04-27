@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { LoadingController, ToastController } from '@ionic/angular';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { AuthService } from '../services/auth.services';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-lista-activos',
@@ -12,37 +12,28 @@ import { AuthService } from '../services/auth.services';
 export class ListaActivosPage implements OnInit {
 
   activos: any[] = [];
-  imagenes: { [key: number]: SafeUrl } = {};
+  imagenes: { [key: number]: string } = {};
 
-  imagenSeleccionada: SafeUrl | null = null;
+  // 🔥 modal imagen
+  imagenSeleccionada: string | null = null;
   modalImagenAbierto = false;
 
   private apiUrl = 'http://172.16.64.120:8080/api_activos_v2/public/';
-
-  // 🔥 PAGINACIÓN
-  pagina = 1;
-  limite = 10;
   cargando = false;
-  hayMas = true;
-
-  // 🔥 CONTROL DE DUPLICADOS
-  private idsCargados = new Set<number>();
 
   constructor(
     private http: HttpClient,
     private loadingController: LoadingController,
     private toastController: ToastController,
-    private sanitizer: DomSanitizer,
-    private auth: AuthService
+    private auth: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.init();
   }
 
-  // ================= INIT =================
   async init() {
-
     const loading = await this.loadingController.create({
       message: 'Cargando...'
     });
@@ -50,7 +41,6 @@ export class ListaActivosPage implements OnInit {
     await loading.present();
 
     try {
-
       const token = await this.auth.getToken();
 
       if (!token) {
@@ -68,53 +58,27 @@ export class ListaActivosPage implements OnInit {
     }
   }
 
-  // ================= CARGAR ACTIVOS =================
+  // ================= CARGAR =================
   async cargarActivos(event?: any) {
 
-    if (this.cargando || !this.hayMas) {
-      event?.target?.complete();
+    if (this.cargando) {
+      this.completeEvent(event);
       return;
     }
 
     this.cargando = true;
 
-    this.http.get<any[]>(
-      `${this.apiUrl}activos?pagina=${this.pagina}&limite=${this.limite}`
-    ).subscribe({
+    this.http.get<any[]>(`${this.apiUrl}activos`).subscribe({
 
       next: (res) => {
 
-        const data = res || [];
+        this.activos = res || [];
 
-        // 🔥 eliminar duplicados
-        const nuevos = data.filter((a: any) => {
-          if (this.idsCargados.has(a.id)) {
-            return false;
-          }
-          this.idsCargados.add(a.id);
-          return true;
-        });
-
-        // 🔥 si no hay nuevos datos reales
-        if (nuevos.length === 0) {
-          this.hayMas = false;
-        }
-
-        // 🔥 si vino menos de lo esperado, ya no hay más
-        if (nuevos.length < this.limite) {
-          this.hayMas = false;
-        }
-
-        this.activos = [...this.activos, ...nuevos];
-
-        // cargar imágenes
-        for (const activo of nuevos) {
+        for (const activo of this.activos) {
           if (activo.id) {
             this.cargarImagen(activo.id);
           }
         }
-
-        this.pagina++;
 
       },
 
@@ -130,27 +94,37 @@ export class ListaActivosPage implements OnInit {
 
       complete: () => {
         this.cargando = false;
-        event?.target?.complete();
+        this.completeEvent(event);
       }
 
     });
   }
 
-  // ================= INFINITE SCROLL =================
-  async loadMore(event: any) {
+  async refrescarManual() {
+    await this.cargarActivos();
+  }
+
+  async refrescar(event: any) {
     await this.cargarActivos(event);
+  }
+
+  private completeEvent(event: any) {
+    if (event?.target && typeof event.target.complete === 'function') {
+      event.target.complete();
+    }
   }
 
   // ================= IMAGEN =================
   cargarImagen(id: number) {
+
+    if (this.imagenes[id]) return;
 
     this.http.get(`${this.apiUrl}activo/${id}/imagen`, {
       responseType: 'blob'
     }).subscribe({
 
       next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        this.imagenes[id] = this.sanitizer.bypassSecurityTrustUrl(url);
+        this.imagenes[id] = URL.createObjectURL(blob);
       },
 
       error: (err) => {
@@ -161,7 +135,7 @@ export class ListaActivosPage implements OnInit {
   }
 
   // ================= MODAL =================
-  abrirImagen(img: SafeUrl) {
+  abrirImagen(img: string) {
     this.imagenSeleccionada = img;
     this.modalImagenAbierto = true;
   }
@@ -171,18 +145,11 @@ export class ListaActivosPage implements OnInit {
     this.imagenSeleccionada = null;
   }
 
-  // ================= REFRESH =================
-  async refrescar(event?: any) {
-
-    this.pagina = 1;
-    this.activos = [];
-    this.idsCargados.clear();   // 🔥 clave para evitar duplicados
-    this.hayMas = true;
-
-    await this.cargarActivos(event);
+  // ================= SCAN =================
+  irEscaner() {
+    this.router.navigate(['/scan-barcode']);
   }
 
-  // ================= TOAST =================
   private async showToast(msg: string, color: string) {
     const t = await this.toastController.create({
       message: msg,

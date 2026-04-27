@@ -1,0 +1,53 @@
+.menu-content {
+  --background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+.welcome {
+  text-align: center;
+  color: white;
+  margin-top: 20px;
+}
+
+.welcome h2 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.welcome p {
+  opacity: 0.8;
+}
+
+/* Grid */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  padding: 20px;
+}
+
+/* Tarjetas */
+.menu-card {
+  text-align: center;
+  padding: 20px;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.menu-card:hover {
+  transform: scale(1.05);
+}
+
+/* Iconos */
+.menu-card ion-icon {
+  font-size: 40px;
+  color: #2a5298;
+  margin-bottom: 10px;
+}
+
+/* Texto */
+.menu-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
