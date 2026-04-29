@@ -20,13 +20,14 @@
   <div class="card-list">
 
     <div
-      *ngFor="let item of activos"
-      class="card-item"
-      [ngClass]="{
-        'ok': item.encontrado && !item.tieneIncidencia,
-        'warning': item.tieneIncidencia,
-        'pendiente': !item.encontrado && !item.tieneIncidencia
-      }"
+     *ngFor="let item of activos"
+  class="card-item"
+  [attr.id]="'item-' + item.codigo"
+  [ngClass]="{
+    'ok': item.encontrado && !item.tieneIncidencia,
+    'warning': item.tieneIncidencia,
+    'pendiente': !item.encontrado && !item.tieneIncidencia
+  }"
     >
 
       <!-- 🖼️ IMAGEN -->

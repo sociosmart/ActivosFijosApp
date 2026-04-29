@@ -49,6 +49,50 @@ export class InventarioCapturaPage implements OnInit {
         nombre: 'Laptop',
         encontrado: false,
         imagen: 'https://via.placeholder.com/80'
+      },
+      {
+        codigo: '101',
+        nombre: 'Laptop',
+        encontrado: false,
+        imagen: 'https://via.placeholder.com/80'
+      },
+      {
+        codigo: '1213',
+        nombre: 'Laptop',
+        encontrado: false,
+        imagen: 'https://via.placeholder.com/80'
+      },{
+        codigo: '1415',
+        nombre: 'Laptop',
+        encontrado: false,
+        imagen: 'https://via.placeholder.com/80'
+      },
+      {
+        codigo: '1617',
+        nombre: 'Laptop',
+        encontrado: false,
+        imagen: 'https://via.placeholder.com/80'
+      },
+      
+      {
+        codigo: '1819',
+        nombre: 'Laptop',
+        encontrado: false,
+        imagen: 'https://via.placeholder.com/80'
+      }
+      ,
+      {
+        codigo: '2021',
+        nombre: 'Laptop',
+        encontrado: false,
+        imagen: 'https://via.placeholder.com/80'
+      }
+      ,
+      {
+        codigo: '2223',
+        nombre: 'Laptop',
+        encontrado: false,
+        imagen: 'https://via.placeholder.com/80'
       }
     ];
   }
@@ -62,31 +106,36 @@ export class InventarioCapturaPage implements OnInit {
   }
 
   // 🔥 PROCESO
-  async procesarCodigo(codigo: string) {
+ 
+  procesarCodigo(codigo: string) {
 
-    const item = this.activos.find(a => a.codigo === codigo);
+  const item = this.activos.find(a => a.codigo === codigo);
 
-    if (item) {
+  if (item) {
 
-      if (item.tieneIncidencia) {
-        this.mostrarToast('⚠️ Este activo tiene incidencia', 'warning');
-        return;
-      }
-
-      if (item.encontrado) {
-        this.mostrarToast('⚠️ Ya escaneado', 'warning');
-        return;
-      }
-
-      item.encontrado = true;
-      this.escaneados++;
-
-      this.mostrarToast('✔ Escaneado', 'success');
-
-    } else {
-      this.agregarNoEncontrado(codigo);
+    if (item.tieneIncidencia) {
+      this.mostrarToast('⚠️ Tiene incidencia', 'warning');
+      this.scrollToItem(codigo); // 👈 también lo enfoca
+      return;
     }
+
+    if (item.encontrado) {
+      this.mostrarToast('⚠️ Ya escaneado', 'warning');
+      this.scrollToItem(codigo);
+      return;
+    }
+
+    item.encontrado = true;
+    this.escaneados++;
+
+    this.mostrarToast('✔ Escaneado', 'success');
+
+    this.scrollToItem(codigo); // 🔥 AQUÍ ESTÁ LA MAGIA
+
+  } else {
+    this.agregarNoEncontrado(codigo);
   }
+}
 
   // ❌ NO ENCONTRADO
   agregarNoEncontrado(codigo: string) {
@@ -179,4 +228,24 @@ export class InventarioCapturaPage implements OnInit {
 
     console.log('🚀', payload);
   }
+scrollToItem(codigo: string) {
+  setTimeout(() => {
+    const element = document.getElementById('item-' + codigo);
+
+    if (element) {
+
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+
+      // ✨ highlight
+      element.classList.add('highlight');
+
+      setTimeout(() => {
+        element.classList.remove('highlight');
+      }, 600);
+    }
+  }, 100);
+}
 }

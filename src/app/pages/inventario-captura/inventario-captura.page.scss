@@ -28,6 +28,18 @@
 /* 🟢 OK */
 .card-item.ok {
   border-left: 4px solid #10b981;
+  background: rgba(16, 185, 129, 0.08); /* 🔥 ESTE ES EL QUE FALTABA */
+  animation: flashOk 0.4s ease;
+}
+@keyframes flashOk {
+  0% {
+    background: #bbf7d0; /* verde fuerte */
+    transform: scale(1.01);
+  }
+  100% {
+    background: rgba(16, 185, 129, 0.08); /* verde suave FINAL */
+    transform: scale(1);
+  }
 }
 
 /* 🟠 INCIDENCIA */
@@ -209,5 +221,20 @@ ion-input {
   }
   to {
     background: #ffffff;
+  }
+}
+.highlight {
+  animation: highlightItem 0.6s ease;
+}
+
+@keyframes highlightItem {
+  0% {
+    box-shadow: 0 0 0px rgba(16,185,129,0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16,185,129,0.6);
+  }
+  100% {
+    box-shadow: 0 0 0px rgba(16,185,129,0);
   }
 }

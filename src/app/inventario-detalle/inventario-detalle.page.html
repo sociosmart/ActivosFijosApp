@@ -93,19 +93,5 @@
     Guardar cambios
   </ion-button>
 
-  <!-- 🔥 BOTÓN CAPTURA INVENTARIO -->
-  <ion-button
-    expand="block"
-    class="btn-primary"
-    [color]="inventario?.estatus === 'completado' ? 'success' : 'warning'"
-    (click)="accionInventario()"
-  >
-    <ion-icon
-      [name]="inventario?.estatus === 'completado' ? 'download-outline' : 'play-outline'"
-      slot="start">
-    </ion-icon>
-
-    {{ inventario?.estatus === 'completado' ? 'Descargar' : 'Capturar Inventario' }}
-  </ion-button>
 
 </ion-content>

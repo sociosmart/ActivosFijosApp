@@ -22,7 +22,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 
   imports: [
     BrowserModule,
-    IonicModule.forRoot({ innerHTMLTemplatesEnabled: true, backButtonText: 'Atrás' }),
+    IonicModule.forRoot({ innerHTMLTemplatesEnabled: true, backButtonText: '' }),
     
     AppRoutingModule,
     HttpClientModule,

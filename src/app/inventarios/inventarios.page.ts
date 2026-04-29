@@ -48,13 +48,7 @@ export class InventariosPage implements OnInit {
 
   // ================= ACCIONES =================
 
-  accionInventario(inv: any) {
-    if (inv.estatus === 'completado') {
-      this.descargar(inv);
-    } else {
-      this.continuar(inv);
-    }
-  }
+
 
   descargar(inv: any) {
     this.showToast(`Descargando ${inv.nombre} 📥`, 'primary');
@@ -91,6 +85,11 @@ async nuevoInventario() {
 irDetalle(inv: any) {
   console.log(inv);
    this.router.navigate(['/inventario-detalle', inv.id], {
+    state: { inventario: inv }
+  });
+}
+  accionInventario(inv:any) {
+  this.router.navigate(['/inventario-captura'], {
     state: { inventario: inv }
   });
 }

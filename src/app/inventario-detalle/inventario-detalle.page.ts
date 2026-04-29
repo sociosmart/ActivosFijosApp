@@ -47,10 +47,6 @@ export class InventarioDetallePage implements OnInit {
     console.log('Guardado:', this.inventario);
     this.router.navigate(['/inventarios']);
   }
-  accionInventario() {
-  this.router.navigate(['/inventario-captura'], {
-    state: { inventario: this.inventario }
-  });
-}
+
   
 }
