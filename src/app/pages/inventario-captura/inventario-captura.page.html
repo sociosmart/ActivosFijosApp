@@ -1,0 +1,134 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/inventarios" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Captura</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- RESUMEN -->
+  <div class="resumen">
+    <div>✔ {{ escaneados }}</div>
+    <div>⚠️ {{ incidencias.length }}</div>
+    <div>❌ {{ noEncontrados.length }}</div>
+  </div>
+
+  <!-- 📦 ACTIVOS -->
+  <div class="card-list">
+
+    <div
+      *ngFor="let item of activos"
+      class="card-item"
+      [ngClass]="{
+        'ok': item.encontrado && !item.tieneIncidencia,
+        'warning': item.tieneIncidencia,
+        'pendiente': !item.encontrado && !item.tieneIncidencia
+      }"
+    >
+
+      <!-- 🖼️ IMAGEN -->
+      <div class="img-box" (click)="verImagen(item.imagen)">
+        <img [src]="item.imagen" />
+      </div>
+
+      <!-- 📄 INFO -->
+      <div class="info-box">
+
+        <div class="titulo">{{ item.nombre }}</div>
+        <div class="codigo">{{ item.codigo }}</div>
+
+        <!-- 🔶 INCIDENCIA -->
+        <div *ngIf="item.tieneIncidencia" class="incidencia-box">
+
+          <img
+            [src]="item.incidencia?.foto"
+            (click)="verImagen(item.incidencia.foto)"
+          />
+
+          <div class="incidencia-texto">
+            {{ item.incidencia?.nota }}
+          </div>
+
+          <ion-button size="small" color="danger" (click)="quitarIncidencia(item)">
+            Quitar
+          </ion-button>
+
+        </div>
+
+      </div>
+
+      <!-- 📸 BOTÓN -->
+      <ion-button fill="clear" (click)="reportarIncidencia(item)">
+        <ion-icon name="camera-outline"></ion-icon>
+      </ion-button>
+
+    </div>
+
+  </div>
+
+  <!-- ❌ NO ENCONTRADOS -->
+  <div class="seccion">
+    <h3>No encontrados</h3>
+
+    <div *ngFor="let nf of noEncontrados; let i = index" class="nf-card">
+
+      <div class="nf-row">
+
+        <!-- IMG -->
+        <img [src]="nf.imagen" (click)="verImagen(nf.imagen)" />
+
+        <!-- INFO -->
+        <div class="nf-info">
+
+          <div class="nf-codigo">{{ nf.codigo }}</div>
+
+          <ion-input
+            placeholder="Descripción"
+            [(ngModel)]="nf.descripcion">
+          </ion-input>
+
+          <ion-input
+            placeholder="Cuenta correcta"
+            [(ngModel)]="nf.cuenta">
+          </ion-input>
+
+        </div>
+
+        <!-- DELETE -->
+        <ion-button fill="clear" (click)="eliminarNoEncontrado(i)">
+          <ion-icon name="close-circle"></ion-icon>
+        </ion-button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GUARDAR -->
+  <div class="p-15">
+    <ion-button expand="block" class="btn-primary" (click)="guardar()">
+      Guardar
+    </ion-button>
+  </div>
+
+  <!-- FAB -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="iniciarScan()">
+      <ion-icon name="scan-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <!-- MODAL IMAGEN -->
+  <ion-modal [isOpen]="imagenSeleccionada !== null">
+    <ng-template>
+      <ion-content class="modal-img">
+        <img [src]="imagenSeleccionada" class="img-full"/>
+        <ion-button expand="block" (click)="cerrarImagen()">Cerrar</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>

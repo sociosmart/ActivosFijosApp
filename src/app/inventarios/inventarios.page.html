@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-     <ion-buttons slot="start">
+    <ion-buttons slot="start">
       <ion-back-button defaultHref="/menu"></ion-back-button>
     </ion-buttons>
     <ion-title>Inventarios</ion-title>
@@ -10,8 +10,8 @@
 <ion-content>
 
   <!-- 🔽 BOTÓN PRINCIPAL -->
-  <div style="padding: 15px;">
-    <ion-button expand="block" color="primary" (click)="nuevoInventario()">
+  <div class="p-15">
+    <ion-button expand="block" color="primary" class="btn-primary" (click)="nuevoInventario()">
       <ion-icon name="add-circle-outline" slot="start"></ion-icon>
       Nuevo Inventario
     </ion-button>
@@ -20,44 +20,67 @@
   <!-- 📦 LISTA -->
   <ion-list>
 
-    <ion-item *ngFor="let inv of inventarios" (click)="irDetalle(inv)"> 
+    <ion-item *ngFor="let inv of inventarios" lines="none">
 
-      <ion-label>
+      <div class="form-card full-width">
 
-        <!-- HEADER -->
-        <div class="header-card">
-          <h2>{{ inv.nombre }}</h2>
-          <span class="badge-id">#{{ inv.id }}</span>
+        <!-- 🔹 CLICK GENERAL -->
+        <div (click)="irDetalle(inv)">
+
+          <!-- HEADER -->
+          <div class="header-card">
+            <h2>{{ inv.nombre }}</h2>
+            <span class="badge-id">#{{ inv.id }}</span>
+          </div>
+
+          <!-- GRID INFO -->
+          <div class="info-grid">
+
+            <div class="info-item">
+              <ion-icon name="business-outline"></ion-icon>
+              <span>{{ inv.empresa }}</span>
+            </div>
+
+            <div class="info-item">
+              <ion-icon name="stats-chart-outline"></ion-icon>
+              <span>{{ inv.cuenta }}</span>
+            </div>
+
+            <div class="info-item">
+              <ion-icon name="location-outline"></ion-icon>
+              <span>{{ inv.ubicacion }}</span>
+            </div>
+
+            <div class="info-item">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>{{ inv.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+
+          </div>
+
         </div>
 
-        <!-- UBICACIÓN -->
-        <div class="info-item">
-          <ion-icon name="location-outline"></ion-icon>
-          <span>{{ inv.ubicacion }}</span>
+        <!-- 🔘 ACCIONES -->
+        <div class="acciones">
+
+          <ion-button
+            
+            expand="block"
+            [color]="inv.estatus === 'completado' ? 'success' : 'warning'"
+            (click)="accionInventario(inv); $event.stopPropagation()"
+            class="btn-primary"
+          >
+            <ion-icon
+              [name]="inv.estatus === 'completado' ? 'download-outline' : 'play-outline'"
+              slot="start">
+            </ion-icon>
+
+            {{ inv.estatus === 'completado' ? 'Descargar' : 'Continuar' }}
+          </ion-button>
+
         </div>
 
-        <!-- FECHA -->
-        <div class="info-item">
-          <ion-icon name="calendar-outline"></ion-icon>
-          <span>{{ inv.fecha }}</span>
-        </div>
-
-        <!-- BOTÓN DINÁMICO -->
-        <ion-button
-          size="small"
-          expand="block"
-          [color]="inv.estatus === 'completado' ? 'success' : 'warning'"
-          (click)="accionInventario(inv)"
-        >
-          <ion-icon
-            [name]="inv.estatus === 'completado' ? 'download-outline' : 'play-outline'"
-            slot="start">
-          </ion-icon>
-
-          {{ inv.estatus === 'completado' ? 'Descargar' : 'Continuar' }}
-        </ion-button>
-
-      </ion-label>
+      </div>
 
     </ion-item>
 

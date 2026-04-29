@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
+import { InventarioNuevoPage } from '../inventario-nuevo/inventario-nuevo.page';
 
 @Component({
   selector: 'app-inventarios',
@@ -12,7 +14,7 @@ export class InventariosPage implements OnInit {
   inventarios: any[] = [];
   
 
-  constructor(private toast: ToastController,private router:Router) {}
+  constructor(private toast: ToastController,private router:Router,private modalCtrl: ModalController ) {}
 
   ngOnInit() {
     this.cargarInventarios();
@@ -20,30 +22,29 @@ export class InventariosPage implements OnInit {
 
   // 🔥 Simulación (luego lo conectas a API)
   cargarInventarios() {
-    this.inventarios = [
-      {
-        id: 1,
-        nombre: 'Inventario Sucursal Norte',
-        ubicacion: 'Los Mochis',
-        fecha: '2026-04-27',
-        estatus: 'nuevo' // nuevo | en_proceso | completado
-      },
-      {
-        id: 2,
-        nombre: 'Inventario Almacén',
-        ubicacion: 'Culiacán',
-        fecha: '2026-04-20',
-        estatus: 'en_proceso'
-      },
-      {
-        id: 3,
-        nombre: 'Inventario General',
-        ubicacion: 'Mazatlán',
-        fecha: '2026-04-10',
-        estatus: 'completado'
-      }
-    ];
-  }
+  this.inventarios = [
+    {
+      id: 1,
+      nombre: 'Inventario Sucursal Norte',
+      empresa: 'Empresa A',
+      cuenta: 'Cuenta 1',
+      ubicacion: 'Los Mochis',
+      fecha: new Date().toISOString(),
+      estatus: 'nuevo',
+      detalle: 'Inventario inicial'
+    },
+    {
+      id: 2,
+      nombre: 'Inventario Almacén',
+      empresa: 'Empresa B',
+      cuenta: 'Cuenta 2',
+      ubicacion: 'Culiacán',
+      fecha: new Date().toISOString(),
+      estatus: 'en_proceso',
+      detalle: 'Conteo parcial'
+    }
+  ];
+}
 
   // ================= ACCIONES =================
 
@@ -62,10 +63,22 @@ export class InventariosPage implements OnInit {
   continuar(inv: any) {
     this.showToast(`Continuando ${inv.nombre} ▶️`, 'success');
   }
+async nuevoInventario() {
 
-  nuevoInventario() {
-    this.showToast('Crear nuevo inventario ➕', 'primary');
+  const modal = await this.modalCtrl.create({
+    component: InventarioNuevoPage,
+    cssClass: 'modal-inventario' // 🔥 flotante
+  });
+
+  await modal.present();
+
+  const { data } = await modal.onDidDismiss();
+
+  if (data) {
+    this.inventarios.unshift(data); // 🔥 se actualiza la lista
+    this.showToast('Inventario creado correctamente ✅', 'success');
   }
+}
 
   async showToast(msg: string, color: string) {
     const t = await this.toast.create({
@@ -76,6 +89,9 @@ export class InventariosPage implements OnInit {
     t.present();
   }
 irDetalle(inv: any) {
-  this.router.navigate(['/inventario-detalle', inv.id]);
+  console.log(inv);
+   this.router.navigate(['/inventario-detalle', inv.id], {
+    state: { inventario: inv }
+  });
 }
 }

@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Nuevo Inventario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <div class="form-card">
+
+    <!-- EMPRESA -->
+    <div class="form-group">
+      <label>Empresa</label>
+      <ion-item lines="none">
+        <ion-icon name="business-outline" slot="start"></ion-icon>
+        <ion-select [(ngModel)]="form.empresa" placeholder="Seleccionar">
+          <ion-select-option *ngFor="let e of empresas" [value]="e">
+            {{ e }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+
+    <!-- CUENTA -->
+    <div class="form-group">
+      <label>Cuenta Analítica</label>
+      <ion-item lines="none">
+        <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+        <ion-select [(ngModel)]="form.cuenta" placeholder="Seleccionar">
+          <ion-select-option *ngFor="let c of cuentas" [value]="c">
+            {{ c }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+
+    <!-- NOMBRE -->
+    <div class="form-group">
+      <label>Nombre</label>
+      <ion-item lines="none">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        <ion-input [(ngModel)]="form.nombre" placeholder="Nombre del inventario"></ion-input>
+      </ion-item>
+    </div>
+
+    <!-- DETALLE -->
+    <div class="form-group">
+      <label>Detalle</label>
+      <ion-item lines="none">
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        <ion-textarea 
+          [(ngModel)]="form.detalle"
+          maxlength="500"
+          autoGrow="true"
+          placeholder="Descripción...">
+        </ion-textarea>
+      </ion-item>
+      <div class="char-count">
+        {{ form.detalle?.length || 0 }}/500
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTÓN -->
+  <ion-button expand="block"  class="btn-accion" (click)="crear()">
+    <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+    Crear Inventario
+  </ion-button>
+
+</ion-content>

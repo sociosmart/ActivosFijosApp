@@ -1,16 +1,111 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/inventarios"></ion-back-button>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/inventarios" text=""></ion-back-button>
     </ion-buttons>
-    <ion-title>inventario-detalle</ion-title>
+    <ion-title>Detalle Inventario</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">inventario-detalle</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+
+  <div class="form-card" *ngIf="inventario">
+
+    <!-- EMPRESA -->
+    <div class="form-group">
+      <label>Empresa</label>
+      <ion-item lines="none">
+        <ion-icon name="business-outline" slot="start"></ion-icon>
+        <ion-select [(ngModel)]="inventario.empresa">
+          <ion-select-option value="Empresa A">Empresa A</ion-select-option>
+          <ion-select-option value="Empresa B">Empresa B</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+
+    <!-- CUENTA -->
+    <div class="form-group">
+      <label>Cuenta Analítica</label>
+      <ion-item lines="none">
+        <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+        <ion-select [(ngModel)]="inventario.cuenta">
+          <ion-select-option value="Cuenta 1">Cuenta 1</ion-select-option>
+          <ion-select-option value="Cuenta 2">Cuenta 2</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+
+    <!-- NOMBRE -->
+    <div class="form-group">
+      <label>Nombre</label>
+      <ion-item lines="none">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        <ion-input [(ngModel)]="inventario.nombre"></ion-input>
+      </ion-item>
+    </div>
+
+    <!-- DETALLE -->
+    <div class="form-group">
+      <label>Detalle</label>
+      <ion-item lines="none">
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        <ion-textarea 
+          [(ngModel)]="inventario.detalle"
+          maxlength="500"
+          autoGrow="true">
+        </ion-textarea>
+      </ion-item>
+      <div class="char-count">
+        {{ inventario.detalle?.length || 0 }}/500
+      </div>
+    </div>
+
+    <!-- ESTATUS -->
+    <div class="form-group">
+      <label>Estatus</label>
+      <ion-item lines="none">
+        <ion-icon name="flag-outline" slot="start"></ion-icon>
+        <ion-select [(ngModel)]="inventario.estatus">
+          <ion-select-option value="nuevo">Nuevo</ion-select-option>
+          <ion-select-option value="en_proceso">En proceso</ion-select-option>
+          <ion-select-option value="completado">Completado</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+
+    <!-- FECHA -->
+    <div class="form-group">
+      <label>Fecha</label>
+      <ion-item lines="none">
+        <ion-icon name="calendar-outline" slot="start"></ion-icon>
+        <ion-input
+          [value]="inventario.fecha | date:'dd/MM/yyyy HH:mm'"
+          readonly>
+        </ion-input>
+      </ion-item>
+    </div>
+
+  </div>
+
+  <!-- 🔘 BOTÓN GUARDAR -->
+  <ion-button expand="block" class="btn-primary" (click)="guardar()">
+    <ion-icon name="save-outline" slot="start"></ion-icon>
+    Guardar cambios
+  </ion-button>
+
+  <!-- 🔥 BOTÓN CAPTURA INVENTARIO -->
+  <ion-button
+    expand="block"
+    class="btn-primary"
+    [color]="inventario?.estatus === 'completado' ? 'success' : 'warning'"
+    (click)="accionInventario()"
+  >
+    <ion-icon
+      [name]="inventario?.estatus === 'completado' ? 'download-outline' : 'play-outline'"
+      slot="start">
+    </ion-icon>
+
+    {{ inventario?.estatus === 'completado' ? 'Descargar' : 'Capturar Inventario' }}
+  </ion-button>
+
 </ion-content>

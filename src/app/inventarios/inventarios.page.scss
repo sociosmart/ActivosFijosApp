@@ -1,21 +1,116 @@
+/* 🔥 ESPACIADO */
+.p-15 {
+  padding: 15px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* 🔥 CARD */
+.form-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 16px;
+}
+
+/* 🔥 HEADER */
 .header-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
+.header-card h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: #111827;
+}
+
+/* 🔥 BADGE */
 .badge-id {
   font-size: 12px;
   background: #3880ff;
   color: white;
-  padding: 3px 8px;
-  border-radius: 8px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-weight: 600;
 }
 
+/* 🔥 GRID INFO */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-top: 10px;
+}
+
+/* 🔥 INFO ITEM */
 .info-item {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  margin-top: 4px;
+  color: #6b7280;
+}
+
+/* 🔥 ICONOS GENERALES */
+ion-icon {
+  color: #9ca3af;
+  font-size: 18px;
+}
+
+/* 🔥 LIMPIAR IONIC ITEM */
+ion-item {
+  --background: transparent;
+  --inner-border-width: 0;
+  --inner-padding-end: 0;
+  padding: 0;
+}
+
+/* 🔥 ACCIONES */
+.acciones {
+  margin-top: 12px;
+}
+
+/* 🔥 BOTÓN GLOBAL (MISMO DISEÑO PARA TODOS) */
+.btn-primary {
+  --border-radius: 12px;
+  font-weight: 600;
+  height: 48px;
+  letter-spacing: 0.3px;
+}
+
+/* 🔥 ICONO DENTRO DEL BOTÓN */
+.btn-primary ion-icon {
+  font-size: 20px;
+  margin-right: 8px;
+  color: inherit;
+}
+
+.btn-accion ion-icon {
+  font-size: 18px;
+  margin-right: 6px;
+  color: inherit; /* 🔥 clave */
+}
+/* 🔥 BOTÓN DENTRO DE CARD (ligeramente más compacto) */
+
+/* 🔥 ESTILO PARA WARNING (continuar) */
+ion-button[color="warning"].btn-accion {
+  --background: #f59e0b; /* tono más elegante */
+  --background-activated: #d97706;
+  --background-hover: #fbbf24;
+  --color: #ffffff;
+}
+
+/* 🔥 ESTILO PARA SUCCESS (descargar) */
+ion-button[color="success"].btn-accion {
+  --background: #10b981; /* verde moderno */
+  --background-activated: #059669;
+  --background-hover: #34d399;
+  --color: #ffffff;
 }

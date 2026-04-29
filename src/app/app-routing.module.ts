@@ -42,7 +42,15 @@ const routes: Routes = [
   {
     path: 'inventario-detalle/:id',
     loadChildren: () => import('./inventario-detalle/inventario-detalle.module').then( m => m.InventarioDetallePageModule)
+  },  {
+    path: 'inventario-nuevo',
+    loadChildren: () => import('./inventario-nuevo/inventario-nuevo.module').then( m => m.InventarioNuevoPageModule)
+  },
+  {
+    path: 'inventario-captura',
+    loadChildren: () => import('./pages/inventario-captura/inventario-captura.module').then( m => m.InventarioCapturaPageModule)
   }
+
 
 
 

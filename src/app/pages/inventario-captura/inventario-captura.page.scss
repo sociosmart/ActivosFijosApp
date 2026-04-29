@@ -1,0 +1,213 @@
+/* 🔢 RESUMEN */
+.resumen {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* 📦 LISTA */
+.card-list {
+  padding: 10px;
+}
+
+/* 🎴 CARD BASE */
+.card-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
+}
+
+/* 🟢 OK */
+.card-item.ok {
+  border-left: 4px solid #10b981;
+}
+
+/* 🟠 INCIDENCIA */
+.card-item.warning {
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+/* ⚪ PENDIENTE */
+.card-item.pendiente {
+  opacity: 0.65;
+}
+
+/* 🟣 NO PERTENECE A CUENTA */
+.card-item.out-of-scope {
+  border-left: 4px solid #8b5cf6;
+  background: rgba(139, 92, 246, 0.08);
+}
+
+/* 🖼️ IMAGEN IZQUIERDA */
+.img-box {
+  flex-shrink: 0;
+}
+
+.img-box img {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+}
+
+/* 📄 INFO DERECHA */
+.info-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🧾 NOMBRE */
+.titulo {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+}
+
+/* 🔢 CODIGO */
+.codigo {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* 🔶 INCIDENCIA COMPACTA */
+.incidencia-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* 🖼️ IMG INCIDENCIA */
+.incidencia-box img {
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #f59e0b;
+}
+
+/* 📝 TEXTO INCIDENCIA */
+.incidencia-texto {
+  font-size: 12px;
+  color: #92400e;
+  flex: 1;
+}
+
+/* 🔘 BOTÓN QUITAR */
+.incidencia-box ion-button {
+  height: 28px;
+  font-size: 11px;
+}
+
+/* ❌ SECCIÓN NO ENCONTRADOS */
+.seccion {
+  padding: 12px;
+}
+
+.seccion h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #374151;
+}
+
+/* ❌ CARD NO ENCONTRADO */
+.nf-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+/* ROW */
+.nf-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* IMG */
+.nf-row img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* INFO */
+.nf-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* CODIGO */
+.nf-codigo {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* INPUTS */
+ion-input {
+  font-size: 13px;
+}
+
+/* 🗑️ BOTÓN */
+.nf-row ion-button {
+  flex-shrink: 0;
+}
+
+/* 🔘 BOTÓN PRINCIPAL */
+.btn-primary {
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+}
+
+/* 📏 PADDING */
+.p-15 {
+  padding: 15px;
+}
+
+/* 🔍 MODAL IMAGEN */
+.modal-img {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.img-full {
+  width: 100%;
+  max-height: 80%;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+/* ✨ EFECTO ESCANEO */
+.card-item.ok {
+  animation: flashOk 0.3s ease;
+}
+
+@keyframes flashOk {
+  from {
+    background: #d1fae5;
+  }
+  to {
+    background: #ffffff;
+  }
+}
