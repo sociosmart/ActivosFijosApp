@@ -1,13 +1,17 @@
+/* CARD */
 .form-card {
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  margin: 10px;
 }
 
+/* INPUTS */
 ion-item {
   margin-bottom: 10px;
   --border-radius: 10px;
 }
 
+/* 📸 FOTO */
 .foto-section {
   margin-top: 15px;
   margin-bottom: 15px;
@@ -23,9 +27,79 @@ ion-item {
   max-height: 250px;
   object-fit: cover;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+/* BOTONES */
 .buttons ion-button {
   margin-top: 10px;
+}
+
+/* SCANNER */
+.scanner-active {
+  background: transparent !important;
+}
+
+/* 🔥 INPUT + ICONO */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.scan-icon-inside {
+  position: absolute;
+  right: 10px;
+  font-size: 22px;
+  color: var(--ion-color-primary);
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* padding para que no se encime texto */
+.input-wrapper ion-input {
+  --padding-end: 35px;
+}
+
+/* LOADING */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.9);
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-overlay ion-spinner {
+  width: 45px;
+  height: 45px;
+}
+
+.loading-overlay p {
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+/* BLOQUEO UI */
+.disabled-content {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* CONTENEDOR */
+.main-container {
+  padding: 10px;
+}
+
+/* ICONO HEADER */
+ion-button ion-icon {
+  font-size: 22px;
 }

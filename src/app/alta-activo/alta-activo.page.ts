@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
-import { Platform, ToastController } from '@ionic/angular';
-import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
-import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
+import { ToastController, ModalController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { AuthService } from '../services/auth.services';
-import { CanActivate, Router } from '@angular/router';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { ConfiguracionModalComponent } from '../modals/configuracion-modal/configuracion-modal.component';
+
 @Component({
   selector: 'app-alta-activo',
   templateUrl: './alta-activo.page.html',
@@ -14,23 +15,29 @@ import { CanActivate, Router } from '@angular/router';
 })
 export class AltaActivoPage {
 
-  activoId = '';
+  // ================= CONFIG =================
+  config = {
+    imprimirTicket: true,
+    nomenclaturaAutomatica: false
+  };
+  private CONFIG_KEY = 'app_config_activos';
+
+  // ================= CACHE =================
+  private CACHE_KEYS = {
+    categorias: 'cache_categorias',
+    companias: 'cache_companias',
+    analiticas: 'cache_analiticas'
+  };
+
+  isLoading = true;
+
+  // ================= DATA =================
   nombreActivo = '';
   ubicacion = '';
   referencia = '';
   descripcion = '';
-
-  // Holos 
-  currencyId = 33;
-  state = 'draft';
-  active = true;
-  method = 'linear';
   value = 0;
-  methodPeriod = 1;
-  methodTime = 'number'
-  dateFirstDepreciation = 'last_day_period'
 
-  compania = '';
   categorias: any[] = [];
   categoriaId: number | null = null;
 
@@ -43,471 +50,217 @@ export class AltaActivoPage {
   selectedFile: File | null = null;
   previewImage: string | null = null;
 
-  // 🔁 ÚLTIMO TICKET PARA REIMPRESIÓN
   ultimoTicket: any = null;
 
-  private DPI = 203;
-  private LABEL_WIDTH_MM = 50;
-  private LABEL_HEIGHT_MM = 30;
-
-  private LABEL_WIDTH_DOTS = Math.floor((this.LABEL_WIDTH_MM / 25.4) * this.DPI);
-  private LABEL_HEIGHT_DOTS = Math.floor((this.LABEL_HEIGHT_MM / 25.4) * this.DPI);
-
   constructor(
-    private platform: Platform,
-    private bluetoothSerial: BluetoothSerial,
-    private androidPermissions: AndroidPermissions,
-    private toastController: ToastController,
     private http: HttpClient,
-    private auth: AuthService,private router:Router
+    private auth: AuthService,
+    private toastController: ToastController,
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
-    this.cargarCategorias();
-    this.cargarCompanias();
-    this.cargarAnaliticas();
+    this.cargarConfiguracionLocal();
+    this.initCatalogos();
+  }
+
+  // ================= INIT CACHE + API =================
+  async initCatalogos() {
+
+    const cat = this.getCache(this.CACHE_KEYS.categorias);
+    const com = this.getCache(this.CACHE_KEYS.companias);
+    const ana = this.getCache(this.CACHE_KEYS.analiticas);
+
+    if (cat) this.categorias = cat;
+    if (com) this.companias = com;
+    if (ana) this.analiticas = ana;
+
+    // si hay cache → quita loading
+    if (cat && com && ana) {
+      this.isLoading = false;
+    }
+
+    // refresh en background
+    this.refreshCategorias();
+    this.refreshCompanias();
+    this.refreshAnaliticas();
+  }
+
+  private getCache(key: string): any[] | null {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  }
+
+  private setCache(key: string, data: any[]) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  // ================= REFRESH =================
+  async refreshCategorias() {
+    const token = await this.auth.getToken();
+
+    this.http.get<any>(
+      'http://172.16.64.120:8080/api_activos_v2/public/holos/categorias',
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe(resp => {
+      if (resp.status === 'success') {
+        if (JSON.stringify(this.categorias) !== JSON.stringify(resp.data)) {
+          this.categorias = resp.data;
+          this.setCache(this.CACHE_KEYS.categorias, resp.data);
+        }
+      }
+      this.isLoading = false;
+    });
+  }
+
+  async refreshCompanias() {
+    const token = await this.auth.getToken();
+
+    this.http.get<any>(
+      'http://172.16.64.120:8080/api_activos_v2/public/holos/companias',
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe(resp => {
+      if (resp.status === 'success') {
+        if (JSON.stringify(this.companias) !== JSON.stringify(resp.data)) {
+          this.companias = resp.data;
+          this.setCache(this.CACHE_KEYS.companias, resp.data);
+        }
+      }
+    });
+  }
+
+  async refreshAnaliticas() {
+    const token = await this.auth.getToken();
+
+    this.http.get<any>(
+      'http://172.16.64.120:8080/api_activos_v2/public/holos/analitica',
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe(resp => {
+      if (resp.status === 'success') {
+        if (JSON.stringify(this.analiticas) !== JSON.stringify(resp.data)) {
+          this.analiticas = resp.data;
+          this.setCache(this.CACHE_KEYS.analiticas, resp.data);
+        }
+      }
+    });
+  }
+
+  // ================= CONFIG =================
+  cargarConfiguracionLocal() {
+    const data = localStorage.getItem(this.CONFIG_KEY);
+    if (data) this.config = JSON.parse(data);
+  }
+
+  async abrirConfiguracion() {
+    const modal = await this.modalCtrl.create({
+      component: ConfiguracionModalComponent,
+      componentProps: { config: { ...this.config } }
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      this.config = data;
+      localStorage.setItem(this.CONFIG_KEY, JSON.stringify(data));
+    }
+  }
+
+  // ================= SCANNER =================
+  async abrirScanner() {
+    const status = await BarcodeScanner.checkPermission({ force: true });
+    if (!status.granted) return;
+
+    BarcodeScanner.hideBackground();
+    document.body.classList.add('scanner-active');
+
+    const result = await BarcodeScanner.startScan();
+
+    if (result.hasContent) {
+      this.referencia = result.content;
+      await Haptics.impact({ style: ImpactStyle.Medium });
+    }
+
+    this.cerrarScanner();
+  }
+
+  cerrarScanner() {
+    BarcodeScanner.showBackground();
+    BarcodeScanner.stopScan();
+    document.body.classList.remove('scanner-active');
   }
 
   // ================= FOTO =================
   async tomarFoto() {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 70,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Camera
-      });
+    const image = await Camera.getPhoto({
+      quality: 70,
+      resultType: CameraResultType.DataUrl,
+      source: CameraSource.Camera
+    });
 
-      if (!image?.dataUrl) return;
+    if (!image?.dataUrl) return;
 
-      this.previewImage = image.dataUrl;
-
-      this.selectedFile = this.base64ToFile(
-        image.dataUrl,
-        `foto_${Date.now()}.jpg`
-      );
-
-    } catch {
-      this.showToast('Error cámara ❌', 'danger');
-    }
+    this.previewImage = image.dataUrl;
+    this.selectedFile = this.base64ToFile(image.dataUrl, 'foto.jpg');
   }
 
-  // ================= GUARDAR + IMPRIMIR =================
+  // ================= GUARDAR =================
   async guardarActivoYImprimir() {
-
-    try {
-
-      const token = await this.auth.getToken();
-
-      if (!token) {
-        this.showToast('Sesión expirada ❌', 'danger');
-        return;
-      }
-
-      if (!this.nombreActivo) {
-        this.showToast('Nombre requerido ⚠️', 'warning');
-        return;
-      }
-
-      if (!this.selectedFile) {
-        this.showToast('Debe tomar una foto 📸', 'warning');
-        return;
-      }
-
-      const gps = await this.obtenerUbicacion();
-
-      const formData = new FormData();
-      formData.append('nombre', this.nombreActivo);
-      formData.append('ubicacion', this.ubicacion || '');
-      formData.append('fecha', new Date().toISOString().split('T')[0]);
-      formData.append('fotografia', this.selectedFile, this.selectedFile.name);
-      formData.append('compania', String(this.companiaId) || '');
-      formData.append('latitud', gps?.lat ? String(gps.lat) : '');
-      formData.append('longitud', gps?.lng ? String(gps.lng) : '');
-      formData.append('currency_id', String(this.currencyId));
-      formData.append('code', this.referencia || '');
-      formData.append('categoria', String(this.categoriaId) || '');
-      formData.append('state', this.state);
-      formData.append('active', String(this.active));
-      formData.append('method', this.method);
-      formData.append('cuenta_analitica', String(this.analiticaId) || '');
-      formData.append('value', String(this.value));
-      formData.append('method_period', String(this.methodPeriod));
-      formData.append('method_time', this.methodTime);
-      formData.append('date_first_depreciation', this.dateFirstDepreciation);
-
-      
-
-      console.log("Guardar e imprimir postgres", formData);
-      this.http.post(
-        'http://172.16.64.120:8080/api_activos_v2/public/activos',
-        formData
-      ).subscribe({
-
-        next: async (resp: any) => {
-
-          this.activoId = resp?.id;
-
-          const dataPrint = {
-            id: this.activoId,
-            nombre: this.nombreActivo,
-            ubicacion: this.ubicacion,
-            compania: this.compania,
-            fecha: new Date().toLocaleDateString()
-          };
-
-          // 🔁 GUARDAR PARA REIMPRESIÓN
-          this.ultimoTicket = { ...dataPrint };
-
-          await this.guardarActivoHolos();
-
-          this.showToast('Activo guardado ✅', 'success');
-
-          // await this.imprimirTicket(dataPrint);
-          
-
-          this.limpiarFormulario();
-        },
-
-        error: (err) => {
-          console.error(err);
-          this.showToast('Error al guardar ❌', 'danger');
-        }
-
-      });
-
-    } catch (e) {
-      console.error(e);
-      this.showToast('Error inesperado ❌', 'danger');
+    if (!this.nombreActivo) {
+      return this.showToast('Nombre requerido', 'warning');
     }
-  }
 
-  async guardarActivoHolos(){
-    try {
-      
-      const token = await this.auth.getToken();
-
-      if (!token) {
-        this.showToast('Sesión expirada ❌', 'danger');
-        return;
-      }
-
-      const body = {
-        name: this.nombreActivo,
-        currency_id: this.currencyId,
-        code: this.referencia,
-        company_id: this.companiaId,
-        category_id: this.categoriaId,
-        date: new Date().toISOString().split('T')[0],
-        state: this.state,
-        active: this.active,
-        method: this.method,
-        account_analytic_id: this.analiticaId,
-        value: this.value,
-        method_period: this.methodPeriod,
-        method_time: this.methodTime,
-        date_first_depreciation: this.dateFirstDepreciation
-      };
-
-      console.log("Guardar en holos: ", body);
-
-      this.http.post(
-        'http://172.16.64.120:8080/api_activos_v2/public/holos/activos',
-        body,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      ).subscribe({
-        next: (resp: any) => {
-          console.log(resp);
-
-          if (resp.status === 'success') {
-            this.showToast('Activo creado HOLOS✅', 'success');
-          } else {
-            this.showToast('Error al crear HOLOS❌', 'danger');
-          }
-        },
-        error: (err) => {
-          console.error(err);
-          this.showToast('Error en la petición ❌', 'danger');
-        }
-      });
-
-    } catch (error) {
-      console.log(error);
+    if (!this.selectedFile) {
+      return this.showToast('Debe tomar foto', 'warning');
     }
-  }
 
-  // ================= SELECTS ====================
+    const gps = await Geolocation.getCurrentPosition();
 
-  async cargarCategorias() {
-    try {
-      const token = await this.auth.getToken();
+    const formData = new FormData();
+    formData.append('nombre', this.nombreActivo);
+    formData.append('ubicacion', this.ubicacion);
+    formData.append('referencia', this.referencia);
+    formData.append('value', String(this.value));
+    formData.append('fotografia', this.selectedFile);
 
-      if (!token) {
-        this.showToast('Sesión expirada ❌', 'danger');
-        return;
-      }
+    formData.append('latitud', String(gps.coords.latitude));
+    formData.append('longitud', String(gps.coords.longitude));
 
-      this.http.get<any>(
-        'http://172.16.64.120:8080/api_activos_v2/public/holos/categorias',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      ).subscribe({
-        next: (resp) => {
-          if (resp.status === 'success') {
-            this.categorias = resp.data;
-          }
-        },
-        error: (err) => {
-          console.error(err);
-          this.showToast('Error al cargar categorías ❌', 'danger');
-        }
+    this.http.post('http://172.16.64.120:8080/api_activos_v2/public/activos', formData)
+      .subscribe(async (resp: any) => {
+
+        const dataPrint = {
+          id: resp.id,
+          nombre: this.nombreActivo,
+          ubicacion: this.ubicacion,
+          fecha: new Date().toLocaleDateString()
+        };
+
+        this.ultimoTicket = dataPrint;
+
+        this.showToast('Guardado', 'success');
+
+        this.limpiar();
       });
-
-    } catch (error) {
-      console.log(error);
-    }
   }
-
-  async cargarCompanias() {
-    try {
-      const token = await this.auth.getToken();
-
-      if (!token) {
-        this.showToast('Sesión expirada ❌', 'danger');
-        return;
-      }
-
-      this.http.get<any>(
-        'http://172.16.64.120:8080/api_activos_v2/public/holos/companias',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      ).subscribe({
-        next: (resp) => {
-          if (resp.status === 'success') {
-            this.companias = resp.data;
-          }
-        },
-        error: (err) => {
-          console.error(err);
-          this.showToast('Error al cargar compañias ❌', 'danger');
-        }
-      });
-
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async cargarAnaliticas() {
-    try {
-      const token = await this.auth.getToken();
-
-      if (!token) {
-        this.showToast('Sesión expirada ❌', 'danger');
-        return;
-      }
-
-      this.http.get<any>(
-        'http://172.16.64.120:8080/api_activos_v2/public/holos/analitica',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      ).subscribe({
-        next: (resp) => {
-          if (resp.status === 'success') {
-            this.analiticas = resp.data;
-          }
-        },
-        error: (err) => {
-          console.error(err);
-          this.showToast('Error al cargar analiticas ❌', 'danger');
-        }
-      });
-
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
 
   // ================= REIMPRESIÓN =================
   async reimprimirTicket() {
-
     if (!this.ultimoTicket) {
-      this.showToast('No hay ticket para reimprimir ❌', 'warning');
-      return;
-    }
-
-    await this.imprimirTicket(this.ultimoTicket);
-  }
-
-  // ================= CODIGO BAR =================
-  private generarCodigo(data: any): string {
-
-    const clean = (txt: string) =>
-      (txt || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-zA-Z]/g, '')
-        .toUpperCase();
-
-    const nombre = clean(data.nombre).substring(0, 2).padEnd(2, 'X');
-    const ubicacion = clean(data.ubicacion).substring(0, 2).padEnd(2, 'X');
-    const compania = clean(data.compania).substring(0, 2).padEnd(2, 'X');
-
-    const id = String(data.id).padStart(6, '0');
-
-    return `${nombre}-${ubicacion}-${compania}-${id}`;
-  }
-
-  // ================= GPS =================
-  async obtenerUbicacion() {
-    try {
-      const pos = await Geolocation.getCurrentPosition();
-      return {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
-      };
-    } catch {
-      return null;
-    }
-  }
-
-  // ================= LIMPIAR =================
-  limpiarFormulario() {
-    this.nombreActivo = '';
-    this.ubicacion = '';
-    this.compania = '';
-    this.previewImage = null;
-    this.selectedFile = null;
-    this.activoId = '';
-  }
-
-  // ================= IMPRESIÓN =================
-  private async imprimirTicket(data: any) {
-
-    if (!this.platform.is('cordova')) {
-      this.showToast('Solo en dispositivo real', 'warning');
-      return;
-    }
-
-    try {
-
-      await this.pedirPermisos();
-
-      const devices = await this.bluetoothSerial.list();
-
-      if (!devices.length) {
-        this.showToast('No hay impresoras', 'danger');
-        return;
-      }
-
-      const deviceId = devices[0].address || devices[0].id;
-
-      this.bluetoothSerial.connect(deviceId).subscribe({
-
-        next: async () => {
-
-          const ESC = 0x1B;
-          const GS = 0x1D;
-          const encoder = new TextEncoder();
-
-          const cmds: number[] = [];
-
-          const codigoBarra = this.generarCodigo(data);
-
-          cmds.push(ESC, 0x40); // reset
-cmds.push(ESC, 0x33, 0x00); // sin interlineado
-cmds.push(ESC, 0x61, 0x00); // izquierda
-
-          cmds.push(0x1D, 0x57,
-            this.LABEL_WIDTH_DOTS & 0xff,
-            this.LABEL_WIDTH_DOTS >> 8
-          );
-
-          cmds.push(0x1D, 0x50,
-            this.LABEL_HEIGHT_DOTS & 0xff,
-            this.LABEL_HEIGHT_DOTS >> 8
-          );
-
-          cmds.push(ESC, 0x4D, 0x01);
-          cmds.push(GS, 0x21, 0x00);
-
-              
-          cmds.push(...this.texto(`NOM: ${data.nombre}\n`));
-          cmds.push(...this.texto(`UBI: ${data.ubicacion}\n`));
-          cmds.push(...this.texto(`EMP: ${data.compania}\n`));
-          cmds.push(...this.texto(`FEC: ${data.fecha}\n`));
-
-          const barcode = encoder.encode(codigoBarra);
-
-// 🔥 BARCODE
-cmds.push(GS, 0x68, 90);
-cmds.push(GS, 0x77, 2);
-
-cmds.push(GS, 0x6B, 0x49);
-cmds.push(barcode.length);
-cmds.push(...barcode);
-
-// salto
-//cmds.push(0x0A);
-
-// 🔥 CENTRAR TEXTO ABAJO
-cmds.push(0x1B, 0x61, 0x01); // center
-cmds.push(...this.texto(`${codigoBarra}\n`));
-
-// volver a izquierda
-cmds.push(0x1B, 0x61, 0x00);
-cmds.push(0x0A);
-
-
-// 🔥 pequeño avance controlado ANTES del corte
-cmds.push(0x1B, 0x64, 0x02);
-
-// ✂️ corte estable Qian
-cmds.push(0x1D, 0x56, 0x42, 0x00);
-
-          await new Promise(res => setTimeout(res, 300));
-
-          await this.bluetoothSerial.write(new Uint8Array(cmds).buffer);
-
-          this.bluetoothSerial.disconnect();
-
-          this.showToast('Etiqueta impresa ✅', 'success');
-        },
-
-        error: err => {
-          console.error(err);
-          this.showToast('Error impresión ❌', 'danger');
-        }
-
-      });
-
-    } catch (err) {
-      console.error(err);
-      this.showToast('Error Bluetooth ❌', 'danger');
+      return this.showToast('No hay ticket', 'warning');
     }
   }
 
   // ================= UTIL =================
-  private texto(texto: string): number[] {
-    return Array.from(new TextEncoder().encode(texto));
+  limpiar() {
+    this.nombreActivo = '';
+    this.ubicacion = '';
+    this.referencia = '';
+    this.previewImage = null;
+    this.selectedFile = null;
   }
 
-  private base64ToFile(dataUrl: string, filename: string): File {
+  base64ToFile(dataUrl: string, filename: string): File {
     const arr = dataUrl.split(',');
     const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
     const bstr = atob(arr[1]);
@@ -520,28 +273,12 @@ cmds.push(0x1D, 0x56, 0x42, 0x00);
     return new File([u8arr], filename, { type: mime });
   }
 
-  // ================= PERMISOS =================
-  private async pedirPermisos(): Promise<boolean> {
-    try {
-      await this.androidPermissions.requestPermissions([
-        this.androidPermissions.PERMISSION.BLUETOOTH_CONNECT,
-        this.androidPermissions.PERMISSION.BLUETOOTH_SCAN,
-        this.androidPermissions.PERMISSION.ACCESS_FINE_LOCATION
-      ]);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  // ================= TOAST =================
-  private async showToast(msg: string, color: string) {
+  async showToast(msg: string, color: string) {
     const toast = await this.toastController.create({
       message: msg,
-      duration: 2500,
+      duration: 2000,
       color
     });
     toast.present();
   }
-
 }

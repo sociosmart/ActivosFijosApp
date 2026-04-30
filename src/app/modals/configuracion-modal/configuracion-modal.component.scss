@@ -1,0 +1,33 @@
+.config-card {
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+/* spacing items */
+ion-item {
+  --border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+/* header look */
+ion-card-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* subtitle */
+ion-card-subtitle {
+  font-size: 13px;
+  color: #666;
+}
+
+/* botón guardar */
+.save-btn {
+  margin-top: 20px;
+  --border-radius: 12px;
+}
+
+/* toggle alignment fix */
+ion-toggle {
+  transform: scale(1.1);
+}

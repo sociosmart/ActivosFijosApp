@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Configuración</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()">
+        Cerrar
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-card class="config-card">
+
+    <ion-card-header>
+      <ion-card-title>Ajustes del sistema</ion-card-title>
+      <ion-card-subtitle>Control de comportamiento de la app</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+
+      <!-- IMPRESIÓN -->
+      <ion-item lines="full">
+        <ion-label>
+          Imprimir ticket
+        </ion-label>
+
+        <ion-toggle
+          slot="end"
+          [(ngModel)]="config.imprimirTicket">
+        </ion-toggle>
+      </ion-item>
+
+      <!-- NOMENCLATURA -->
+      <ion-item lines="full">
+        <ion-label>
+          Nomenclatura automática
+        </ion-label>
+
+        <ion-toggle
+          slot="end"
+          [(ngModel)]="config.nomenclaturaAutomatica">
+        </ion-toggle>
+      </ion-item>
+
+      <!-- BOTÓN GUARDAR -->
+      <ion-button
+        expand="block"
+        class="save-btn"
+        (click)="guardar()">
+
+        Guardar configuración
+      </ion-button>
+
+    </ion-card-content>
+
+  </ion-card>
+
+</ion-content>
