@@ -17,7 +17,28 @@ export class AltaActivoPage {
   activoId = '';
   nombreActivo = '';
   ubicacion = '';
+  referencia = '';
+  descripcion = '';
+
+  // Holos 
+  currencyId = 33;
+  state = 'draft';
+  active = true;
+  method = 'linear';
+  value = 0;
+  methodPeriod = 1;
+  methodTime = 'number'
+  dateFirstDepreciation = 'last_day_period'
+
   compania = '';
+  categorias: any[] = [];
+  categoriaId: number | null = null;
+
+  companias: any[] = [];
+  companiaId: number | null = null;
+
+  analiticas: any[] = [];
+  analiticaId: number | null = null;
 
   selectedFile: File | null = null;
   previewImage: string | null = null;
@@ -40,6 +61,12 @@ export class AltaActivoPage {
     private http: HttpClient,
     private auth: AuthService,private router:Router
   ) {}
+
+  ngOnInit() {
+    this.cargarCategorias();
+    this.cargarCompanias();
+    this.cargarAnaliticas();
+  }
 
   // ================= FOTO =================
   async tomarFoto() {
@@ -92,12 +119,26 @@ export class AltaActivoPage {
       const formData = new FormData();
       formData.append('nombre', this.nombreActivo);
       formData.append('ubicacion', this.ubicacion || '');
-      formData.append('compania', this.compania || '');
       formData.append('fecha', new Date().toISOString().split('T')[0]);
+      formData.append('fotografia', this.selectedFile, this.selectedFile.name);
+      formData.append('compania', String(this.companiaId) || '');
       formData.append('latitud', gps?.lat ? String(gps.lat) : '');
       formData.append('longitud', gps?.lng ? String(gps.lng) : '');
-      formData.append('fotografia', this.selectedFile, this.selectedFile.name);
+      formData.append('currency_id', String(this.currencyId));
+      formData.append('code', this.referencia || '');
+      formData.append('categoria', String(this.categoriaId) || '');
+      formData.append('state', this.state);
+      formData.append('active', String(this.active));
+      formData.append('method', this.method);
+      formData.append('cuenta_analitica', String(this.analiticaId) || '');
+      formData.append('value', String(this.value));
+      formData.append('method_period', String(this.methodPeriod));
+      formData.append('method_time', this.methodTime);
+      formData.append('date_first_depreciation', this.dateFirstDepreciation);
 
+      
+
+      console.log("Guardar e imprimir postgres", formData);
       this.http.post(
         'http://172.16.64.120:8080/api_activos_v2/public/activos',
         formData
@@ -118,9 +159,12 @@ export class AltaActivoPage {
           // 🔁 GUARDAR PARA REIMPRESIÓN
           this.ultimoTicket = { ...dataPrint };
 
+          await this.guardarActivoHolos();
+
           this.showToast('Activo guardado ✅', 'success');
 
-          await this.imprimirTicket(dataPrint);
+          // await this.imprimirTicket(dataPrint);
+          
 
           this.limpiarFormulario();
         },
@@ -137,6 +181,167 @@ export class AltaActivoPage {
       this.showToast('Error inesperado ❌', 'danger');
     }
   }
+
+  async guardarActivoHolos(){
+    try {
+      
+      const token = await this.auth.getToken();
+
+      if (!token) {
+        this.showToast('Sesión expirada ❌', 'danger');
+        return;
+      }
+
+      const body = {
+        name: this.nombreActivo,
+        currency_id: this.currencyId,
+        code: this.referencia,
+        company_id: this.companiaId,
+        category_id: this.categoriaId,
+        date: new Date().toISOString().split('T')[0],
+        state: this.state,
+        active: this.active,
+        method: this.method,
+        account_analytic_id: this.analiticaId,
+        value: this.value,
+        method_period: this.methodPeriod,
+        method_time: this.methodTime,
+        date_first_depreciation: this.dateFirstDepreciation
+      };
+
+      console.log("Guardar en holos: ", body);
+
+      this.http.post(
+        'http://172.16.64.120:8080/api_activos_v2/public/holos/activos',
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      ).subscribe({
+        next: (resp: any) => {
+          console.log(resp);
+
+          if (resp.status === 'success') {
+            this.showToast('Activo creado HOLOS✅', 'success');
+          } else {
+            this.showToast('Error al crear HOLOS❌', 'danger');
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.showToast('Error en la petición ❌', 'danger');
+        }
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // ================= SELECTS ====================
+
+  async cargarCategorias() {
+    try {
+      const token = await this.auth.getToken();
+
+      if (!token) {
+        this.showToast('Sesión expirada ❌', 'danger');
+        return;
+      }
+
+      this.http.get<any>(
+        'http://172.16.64.120:8080/api_activos_v2/public/holos/categorias',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      ).subscribe({
+        next: (resp) => {
+          if (resp.status === 'success') {
+            this.categorias = resp.data;
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.showToast('Error al cargar categorías ❌', 'danger');
+        }
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async cargarCompanias() {
+    try {
+      const token = await this.auth.getToken();
+
+      if (!token) {
+        this.showToast('Sesión expirada ❌', 'danger');
+        return;
+      }
+
+      this.http.get<any>(
+        'http://172.16.64.120:8080/api_activos_v2/public/holos/companias',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      ).subscribe({
+        next: (resp) => {
+          if (resp.status === 'success') {
+            this.companias = resp.data;
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.showToast('Error al cargar compañias ❌', 'danger');
+        }
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async cargarAnaliticas() {
+    try {
+      const token = await this.auth.getToken();
+
+      if (!token) {
+        this.showToast('Sesión expirada ❌', 'danger');
+        return;
+      }
+
+      this.http.get<any>(
+        'http://172.16.64.120:8080/api_activos_v2/public/holos/analitica',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      ).subscribe({
+        next: (resp) => {
+          if (resp.status === 'success') {
+            this.analiticas = resp.data;
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.showToast('Error al cargar analiticas ❌', 'danger');
+        }
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
 
   // ================= REIMPRESIÓN =================
   async reimprimirTicket() {

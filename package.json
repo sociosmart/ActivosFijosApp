@@ -42,6 +42,7 @@
     "@ionic/pwa-elements": "^3.4.0",
     "@ionic/storage-angular": "^4.0.0",
     "@trapezedev/configure": "^7.0.10",
+    "@zxing/library": "^0.22.0",
     "apollo-angular": "^10.0.3",
     "capacitor-bluetooth-serial": "^0.0.4",
     "cordova-plugin-android-permissions": "^1.1.5",
